@@ -20,6 +20,7 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 * Custom stars
 * 2D clouds
 * Use noisetex for volumetric clouds noise (filtering done, clouds map wip)
+* Add sun glow effect
 
 # Known issues
 * Sky changes between day and night when player is looking straight up
