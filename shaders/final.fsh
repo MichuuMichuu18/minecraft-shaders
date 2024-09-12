@@ -5,6 +5,7 @@ varying vec2 TexCoords;
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform vec2 texelSize;
+uniform ivec2 eyeBrightnessSmooth;
 
 //#define BLOOM
 #define BLOOM_RESOLUTION 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]

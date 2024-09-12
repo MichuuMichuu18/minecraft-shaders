@@ -16,6 +16,7 @@ uniform vec3 upPosition;
 uniform float rainStrength;
 uniform float frameTimeCounter;
 uniform float nightVision;
+uniform float eyeAltitude;
 
 #include "common.glsl"
 #include "sky.glsl"
@@ -73,12 +74,12 @@ vec4 RaymarchClouds(in vec3 RayOrigin, in vec3 RayDirection, float tmax){
 		float dt = max(0.1, VOLUMETRIC_CLOUDS_SAMPLE_SIZE*clamp(texture2D(noisetex, gl_FragCoord.xy*(1.0/(VOLUMETRIC_CLOUDS_RESOLUTION+0.01))).r*VOLUMETRIC_CLOUDS_DITHERING_STRENGTH+(1.0-VOLUMETRIC_CLOUDS_DITHERING_STRENGTH), 0.0, 1.0)*t);
 		
 		float SunLight = clamp((Density-MapClouds(Position+0.5*normalize(sunPosition), t, Garbage))/0.3, 0.0, 1.0);
-		float MoonLight = clamp((Density-MapClouds(Position+0.5*normalize(-sunPosition), t, Garbage))/0.3, 0.0, 1.0);
+		float MoonLight = clamp((Density-MapClouds(Position+0.5*normalize(-sunPosition), t, Garbage))/2.0, 0.0, 1.0);
 		vec3 SkyColor = GetSkyColor(RayDirection, false);
 		
 		//todo: implement proper ambient light calculation 
-		vec3 lin = mix(Luminance(SkyColor), 1.0, rainStrength)*SkyColor +(SunColor*SunLight*SunVisibility)+(MoonColor*MoonLight*(1.0-SunVisibility));
-		vec4 Color = vec4(SkyColor*lin, Density);
+		vec3 Light = (SunColor*SunLight*SunVisibility)+(MoonColor*MoonLight*(1.0-SunVisibility));
+		vec4 Color = vec4(mix(SkyColor*Luminance(SkyColor), vec3(0.0), Density)+Light, Density);
 
 		Color.a *= VOLUMETRIC_CLOUDS_DENSITY;
 		Color.rgb *= Color.a;
@@ -104,7 +105,7 @@ void main(){
     	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*(1.0/VOLUMETRIC_CLOUDS_RESOLUTION)*texelSize,1.)) * mat3(gbufferModelView);
 	
 		/* DRAWBUFFERS:4 */
-    	gl_FragData[0] = RaymarchClouds(vec3(0), FragmentPosition, 20.0);
+    	gl_FragData[0] = RaymarchClouds(vec3(0, eyeAltitude/50.0-4.0, 0), FragmentPosition, 20.0);
     }
     #else
     

@@ -31,16 +31,16 @@ uniform float nightVision;
 const int colortex0Format = RGBA16F;
 const int colortex1Format = RGB16;
 const int colortex3Format = RGB8;
-const int colortex4Format = RGBA8;
+const int colortex4Format = RGBA16;
 */
 
 #define INFO 0 //[0 1 2 3 4]
 
 const float ambientOcclusionLevel = 0.3;
-
 const float sunPathRotation = -30.0f;
 const int shadowMapResolution = 512; //[512 1024 2048 4096]
 const int noiseTextureResolution = 64;
+const float eyeBrightnessHalflife = 20.0;
 
 const vec3 Ambient = vec3(0.02, 0.04, 0.06);
 const vec3 TorchColor = vec3(1.0, 0.3, 0.05);
@@ -163,7 +163,7 @@ void main(){
     NdotL *= (Luminance(GetSkyColor(FragmentPosition, false))+0.2);
     NdotL *= Lightmap.g;
     
-    vec3 Shadow = mix(vec3(GetShadow(Depth)), 0.1+(LightmapColor/2.0), rainStrength*0.5);    
+    vec3 Shadow = mix(vec3(GetShadow(Depth)), 0.1+(LightmapColor/2.0), rainStrength*0.5);
     vec3 Diffuse = Albedo * (LightmapColor + NdotL * Shadow + Ambient*(1.0+nightVision*8.0));
     
     /* DRAWBUFFERS:0 */
