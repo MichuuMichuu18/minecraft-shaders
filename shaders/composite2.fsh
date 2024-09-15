@@ -42,7 +42,7 @@ void main(){
     }
     
     vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.)) * mat3(gbufferModelView);
-    vec4 FogColor = vec4(ToLinear(GetSkyColor(FragmentPosition, false))*(eyeBrightnessSmooth.y/255.0), mix(0.001, 0.004, rainStrength));
+    vec4 FogColor = vec4(ToLinear(GetSkyColor(FragmentPosition, false))*(eyeBrightnessSmooth.y/255.0), mix(0.001, 0.01, rainStrength));
     vec2 Position = gbufferProjectionInverse[2].zw * Depth + gbufferProjectionInverse[3].zw;
 	float WorldDistance = (Position.x/Position.y);
 	//if(isEyeInWater == 1) { FogColor.rgb *= fogColor; FogColor.a = 0.005; Albedo *= vec3(0.9, 1.1, 1.3); }
