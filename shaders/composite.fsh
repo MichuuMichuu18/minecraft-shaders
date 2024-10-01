@@ -44,7 +44,7 @@ const int shadowMapResolution = 512; //[512 1024 2048 4096]
 const int noiseTextureResolution = 64;
 const float eyeBrightnessHalflife = 20.0;
 
-const vec3 Ambient = vec3(0.02, 0.04, 0.06);
+const vec3 Ambient = vec3(0.04, 0.06, 0.08);
 const vec3 TorchColor = vec3(1.0, 0.3, 0.05);
 
 #include "common.glsl"
@@ -160,20 +160,13 @@ void main(){
     // Do the lighting calculations
     vec3 NdotL = max(dot(Normal, normalize(sunPosition)), 0.0)*SunVisibility*mix(pow(SunColor, vec3(4.0)), SunColor, SunVisibility2);
     NdotL += max(dot(Normal, normalize(-sunPosition)), 0.0)*MoonVisibility*MoonColor;
-    NdotL *= 1.7-rainStrength*0.7;
+    NdotL *= 2.0-rainStrength*0.7;
     vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.)) * mat3(gbufferModelView);
-    NdotL *= (Luminance(GetSkyColor(FragmentPosition, false))+0.2);
     NdotL *= Lightmap.g;
     
     if(NdotL.x > 0.01) { NdotL *= mix(vec3(GetShadow(Depth)), 0.1+(LightmapColor/2.0), rainStrength*0.6); }
     
-    vec3 Diffuse = Albedo * (LightmapColor + NdotL + Ambient*(1.0+nightVision*8.0));
-    
-    vec4 SunPosition = vec4(sunPosition, 1.0) * gbufferProjection;
-    SunPosition = vec4(SunPosition.xyz/SunPosition.w, 1.0);
-    vec2 SunPositionOnScreen = (SunPosition.xy/SunPosition.z)*0.5+0.5;
-    float mie = 0.1 / distance(TexCoords*vec2(aspectRatio, 1.0), SunPositionOnScreen*vec2(aspectRatio, 1.0)) - 0.1; //figure out screen aspect ratio scaling
-    mie *= 2.0-(sign(sunPosition.z)+1.0);
+    vec3 Diffuse = Albedo * (LightmapColor + NdotL + Ambient*(1.0+nightVision*8.0)*GetSkyColor(FragmentPosition, false));
     
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(Diffuse, 1.0f);

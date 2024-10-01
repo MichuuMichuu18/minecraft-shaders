@@ -16,11 +16,12 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 * Retro filter (disabled by default in settings)
 
 # TODO
-* Water shader with SSR
+* Water shader with SSR (maybe just sky reflection first)
 * Custom stars
 * 2D clouds (not sure about that one)
-* Use noisetex for volumetric clouds noise (filtering done, clouds map wip)
-* Add sun glow effect
+* Use noisetex for volumetric clouds noise (clouds map)
+* Rewrite blur code (for bloom etc.)
+* Optimize sky code
 
 # Known issues
 * Sky changes between day and night when player is looking straight up

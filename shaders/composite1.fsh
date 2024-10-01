@@ -28,6 +28,7 @@ uniform float eyeAltitude;
 #define VOLUMETRIC_CLOUDS_DITHERING_STRENGTH 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define VOLUMETRIC_CLOUDS_NOISE_SAMPLES 5 //[1 2 3 4 5 6 7 8 9 10]
 #define VOLUMETRIC_CLOUDS_RESOLUTION 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRIC_CLOUDS_HEIGHT 0.8 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
 #define VOLUMETRIC_CLOUDS_USE_LOD
 
 const mat3 m3 = mat3(0.8,-0.6,0.6,0.8,0.8,-0.6,0.6,0.8,0.6);
@@ -51,8 +52,8 @@ float MapClouds(in vec3 Position, in float t, out float RawData){
 	int Samples = VOLUMETRIC_CLOUDS_NOISE_SAMPLES;
 	#endif
 
-	float d = 1.0-0.3*abs(2.8 - Position.y);
-	d -= (2.0-rainStrength) * Fbm(Position*0.4+frameTimeCounter*0.02, Samples);
+	float d = 1.0-(1.0-VOLUMETRIC_CLOUDS_HEIGHT)*abs(-Position.y);
+	d -= (2.0-rainStrength) * Fbm(Position*0.25+frameTimeCounter*0.02, Samples);
 
 	RawData = d;
 
@@ -110,7 +111,7 @@ void main(){
     	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*(1.0/VOLUMETRIC_CLOUDS_RESOLUTION)*texelSize,1.)) * mat3(gbufferModelView);
 	
 		/* DRAWBUFFERS:4 */
-    	gl_FragData[0] = RaymarchClouds(vec3(0, eyeAltitude/50.0-4.0, 0), FragmentPosition, 50.0);
+    	gl_FragData[0] = RaymarchClouds(vec3(0, eyeAltitude/50.0-10.0, 0), FragmentPosition, 50.0);
     }
     #else
     
