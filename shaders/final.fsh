@@ -12,7 +12,7 @@ uniform ivec2 eyeBrightnessSmooth;
 #define BLOOM_FINAL_BRIGHTNESS 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 vec3 Tonemap(vec3 col){
-	col = exp(-1.0 / (2.72*col + 0.1));
+	col = exp(-1.0 / (2.72*col+0.1));
 	col = pow(col, vec3(1.0 / 2.2));
 	return col;
 }
