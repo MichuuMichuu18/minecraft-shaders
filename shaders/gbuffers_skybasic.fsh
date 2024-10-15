@@ -7,7 +7,9 @@ varying vec4 Color;
 
 // The texture atlas
 uniform sampler2D texture;
+
 uniform sampler2D colortex1;
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;

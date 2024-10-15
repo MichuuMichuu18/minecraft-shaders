@@ -8,6 +8,8 @@ varying vec4 Color;
 // The texture atlas
 uniform sampler2D texture;
 
+uniform sampler2D noisetex;
+
 #include "common.glsl"
 
 void main(){

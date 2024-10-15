@@ -8,9 +8,26 @@ varying vec4 Color;
 // The texture atlas
 uniform sampler2D texture;
 
+uniform sampler2D noisetex;
+uniform vec3 sunPosition;
+uniform vec3 upPosition;
+uniform vec2 texelSize;
+uniform float rainStrength;
+uniform float nightVision;
+
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView;
+
+#include "common.glsl"
+#include "sky.glsl"
+
 void main(){
     // Sample from texture atlas and account for biome color + ambient occlusion
     vec4 Albedo = texture2D(texture, TexCoords) * Color;
+    
+    //vec3 FragmentPosition = ToScreenSpace(vec3(gl_FragCoord.xy*texelSize,1.)) * mat3(gbufferModelView);
+    
+    //Albedo.rgb = mix(Albedo.rgb, ToLinear(GetSkyColor(-normalize(FragmentPosition), true)), 1.0);
     
     /* DRAWBUFFERS:012 */
     // Write the values to the color textures
