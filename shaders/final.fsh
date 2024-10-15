@@ -4,6 +4,7 @@ varying vec2 TexCoords;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
+uniform sampler2D noisetex;
 uniform vec2 texelSize;
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -11,18 +12,21 @@ uniform ivec2 eyeBrightnessSmooth;
 #define BLOOM_RESOLUTION 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define BLOOM_FINAL_BRIGHTNESS 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
-vec3 Tonemap(vec3 col){
-	col = exp(-1.0 / (2.72*col+0.1));
-	col = pow(col, vec3(1.0 / 2.2));
-	return col;
+vec3 ACES(vec3 x) {
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
 //#define SHARPENING
 #define SHARPENING_BLUR_QUALITY 1.0 //[1.0 2.0 3.0]
 #define SHARPENING_BLUR_STEPS 2.0 //[1.0 2.0 3.0 4.0]
-#define SHARPENING_BLUR_STEPS_MULTIPLIER 2.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0]
+#define SHARPENING_BLUR_STEPS_MULTIPLIER 5.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define SHARPENING_BLUR_DIRECTIONS 5.0 //[4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0]
-#define SHARPENING_STRENGTH 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define SHARPENING_STRENGTH 0.1 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define DESATURATE
 //#define RETRO_FILTER
@@ -57,7 +61,7 @@ void main() {
 	#endif
 	
 	#ifdef DESATURATE
-	Color = mix(vec3(Luminance(Color)), Color, 0.9);
+	Color = mix(vec3(Luminance(Color)), Color, 0.8);
 	#endif
 	
 	#ifdef RETRO_FILTER
@@ -68,8 +72,8 @@ void main() {
 	Color = max(vec3(0.0), Color);
 	
 	#ifdef TONEMAP
-	Color = Tonemap(Color);
+	Color = ACES(Color);
 	#endif
 	
-	gl_FragColor = vec4(Color, 1.0f);
+	gl_FragColor = vec4(Color+InterleavedGradientNoise(gl_FragCoord.xy)*exp2(-8.0), 1.0f);
 }
