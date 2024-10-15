@@ -3,6 +3,7 @@
 varying vec2 TexCoords;
 
 uniform sampler2D colortex0;
+uniform sampler2D noisetex;
 
 uniform vec2 texelSize;
 uniform float viewWidth;

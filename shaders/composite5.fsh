@@ -32,14 +32,14 @@ uniform float aspectRatio;
 
 #include "common.glsl"
 
-#define SUN_GLOW
+//#define SUN_GLOW
 
 void main(){
     vec3 Albedo = texture2D(colortex0, TexCoords.xy).rgb;
     
     #ifdef SUN_GLOW
     vec2 FinalSunPosition = (TexCoords.zw - TexCoords.xy)/(vec2(1.0, aspectRatio)*0.01);
-    Albedo += GlowColor*(1.0/(0.1+dot(FinalSunPosition, FinalSunPosition)));
+    Albedo += (1.0-rainStrength*0.97)*GlowColor*(1.0/(1.0+dot(FinalSunPosition, FinalSunPosition)));
     #endif
     
     /* DRAWBUFFERS:0 */

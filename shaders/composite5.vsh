@@ -15,7 +15,7 @@ uniform float aspectRatio;
 
 #include "sky.glsl"
 
-#define SUN_GLOW
+//#define SUN_GLOW
 
 void main() {	
 	#ifdef SUN_GLOW
