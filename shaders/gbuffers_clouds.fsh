@@ -8,10 +8,6 @@ varying vec4 Color;
 // The texture atlas
 uniform sampler2D texture;
 
-float Luminance(vec3 color) {
-    return dot(color, vec3(0.2125, 0.7153, 0.0721));
-}
-
 void main(){
     // Sample from texture atlas and account for biome color + ambient occlusion
     vec4 Albedo = texture2D(texture, TexCoords) * Color;

@@ -28,6 +28,22 @@ float InterleavedGradientNoise(vec2 p){
     return fract( magic.z * fract(dot(p,magic.xy)) );
 }
 
+float Get3DNoise(vec3 pos){
+    float p = floor(pos.z);
+    float f = pos.z - p;
+    
+    const float invNoiseRes = 1.0 / 64.0;
+    
+    float zStretch = 17.0 * invNoiseRes;
+    
+    vec2 coord = pos.xy * invNoiseRes + (p * zStretch);
+    
+    vec2 noise = vec2(texture(noisetex, coord).x,
+					  texture(noisetex, coord + zStretch).y);
+    
+    return mix(noise.x, noise.y, f);
+}
+
 float Hash3(in vec3 x){
 	x  = fract(x * .1031);
     x += dot(x, x.zyx + 31.32);
@@ -71,4 +87,22 @@ vec3 Noise33(in vec3 x){
 	return vec3(Noise2(x.xy), Noise2(x.yz), Noise2(x.zx));
 }
 
+const float PI = 3.14159265;
+const float GoldenAngle = PI * (3.0 - sqrt(5.0));
 
+vec2 Vogel(int sampleIndex, int samplesCount, float Offset){
+  float r = sqrt(float(sampleIndex) + 0.5f) / sqrt(float(samplesCount));
+  float theta = float(sampleIndex) * GoldenAngle + Offset;
+  return r * vec2(cos(theta), sin(theta));
+}
+
+vec4 GetNoise(vec2 coord){
+  ivec2 screenCoord = ivec2(coord * vec2(viewWidth, viewHeight)); // exact pixel coordinate onscreen
+  ivec2 noiseCoord = screenCoord % 64; // wrap to range of noiseTextureResolution
+  return texelFetch(noisetex, noiseCoord, 0);
+}
+
+float GetIGNoise(vec2 coord){
+  ivec2 screenCoord = ivec2(coord * vec2(viewWidth, viewHeight)); // exact pixel coordinate onscreen
+  return InterleavedGradientNoise(screenCoord);
+}

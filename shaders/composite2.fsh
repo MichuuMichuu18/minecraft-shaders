@@ -26,7 +26,7 @@ uniform ivec2 eyeBrightnessSmooth;
 #include "sky.glsl"
 
 //#define VOLUMETRIC_CLOUDS
-#define VOLUMETRIC_CLOUDS_RESOLUTION 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRIC_CLOUDS_RESOLUTION 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 void main(){
     vec3 Albedo = texture2D(colortex0, TexCoords).rgb;
@@ -44,19 +44,18 @@ void main(){
 		return;
     }
     
-    float IsInCave = clamp(1.0-(eyeBrightnessSmooth.y/255.0), 0.0, 1.0);
-    Albedo *= 1.0+IsInCave;
+    float CaveFactor = clamp(1.0-(eyeBrightnessSmooth.y/255.0), 0.0, 1.0);
+    Albedo *= 1.0+CaveFactor;
     
     vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.)) * mat3(gbufferModelView);
-    vec3 FogInCave = vec3(0.402, 0.42, 0.405);
+    vec3 FogInCave = vec3(0.402, 0.41, 0.405);
     if(isEyeInWater == 1) FogInCave.rgb = FogInCave.brg;
-    vec4 FogColor = vec4(ToLinear(mix(GetSkyColor(FragmentPosition, false), FogInCave, IsInCave)), mix(0.001, 0.02, rainStrength)+IsInCave*0.02);
+    vec4 FogColor = vec4(ToLinear(mix(GetSkyColor(FragmentPosition), FogInCave, CaveFactor)), mix(0.0005, 0.02, rainStrength*(1.0-CaveFactor))+CaveFactor*0.02+MoonVisibility2*0.01);
     vec2 Position = gbufferProjectionInverse[2].zw * Depth + gbufferProjectionInverse[3].zw;
 	float WorldDistance = (Position.x/Position.y);
 	//if(isEyeInWater == 1) { FogColor.rgb *= fogColor; FogColor.a = 0.005; Albedo *= vec3(0.9, 1.1, 1.3); }
 	
-	//is it really neccesary? or is there a better way?
-	//FogColor.a *= 1.0-clamp(fogcloudidk, 0.0, 1.0);
+	FogColor.a *= 1.0-clamp(fogcloudidk, 0.0, 1.0);
 	
 	// Support for player effects
 	FogColor = mix(FogColor, vec4(0,0,0,mix(0.2, 0.5, blindness)), clamp(darknessFactor+blindness, 0.0, 1.0));

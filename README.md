@@ -3,25 +3,23 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 
 # Features
 * Multiple profiles suited for wide range of hardware (Lite, Low, Medium, High, Ultra)
-* Diffuse lighting
-* Screenspace fog
-* Desaturation filter
-* Day/night cycle support
-* FXAA
 * Shadow filtering (soft shadows)
 * Colored transparent shadows
 * Sharpening
 * Volumetric clouds
 * Bloom (glow effect)
-* Retro filter (disabled by default in settings)
+* Retro filter (disabled in settings)
+* Sun glow effect
+* Automatic exposure (based on sky light)
+* Sky reflection on water and on land when raining
 
 # TODO
-* Water shader with SSR (maybe just sky reflection first)
+* Screen-space reflections
 * Custom stars
-* 2D clouds (not sure about that one)
-* Use noisetex for volumetric clouds noise (clouds map)
-* Rewrite blur code (for bloom etc.)
-* Optimize sky code
+* Implement atmospheric scattering based sky function
+* Rewrite volumetric clouds
+* Terrain wind
+* Settings menu
 
 # Known issues
-* Sky changes between day and night when player is looking straight up
+* none (yet)

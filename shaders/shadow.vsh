@@ -18,28 +18,18 @@ in vec2 mc_Entity;
 
 #include "common.glsl"
 
-vec2 DistortPosition(in vec2 position){
-    float CenterDistance = length(position);
-    float DistortionFactor = mix(1.0f, CenterDistance, 0.9f);
-    return position / DistortionFactor;
+vec3 DistortShadowClipPos(vec3 shadowClipPos){
+  float distortionFactor = length(shadowClipPos.xy); // distance from the player in shadow clip space
+  distortionFactor += 0.1; // very small distances can cause issues so we add this to slightly reduce the distortion
+
+  shadowClipPos.xy /= distortionFactor;
+  shadowClipPos.z *= 0.5; // increases shadow distance on the Z axis, which helps when the sun is very low in the sky
+  return shadowClipPos;
 }
 
 void main(){
     gl_Position = ftransform();
     TexCoords = gl_MultiTexCoord0.st;
     Color = gl_Color;
-    
-    vec3 Position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
-    vec3 WorldPosition = mat3(shadowModelViewInverse) * Position + shadowModelViewInverse[3].xyz;
-    
-    if(mc_Entity.x == 4) {
-    	WorldPosition += (Noise3(WorldPosition*0.3+frameTimeCounter*0.4)*2.0-1.0)*0.1;
-    }
-    
-    if(mc_Entity.x == 6) {
-    	Color.rgb *= 1.2;
-    }
-    
-    Position = mat3(shadowModelView) * WorldPosition + shadowModelView[3].xyz;
-    gl_Position.xy = DistortPosition(ToClipSpace3(Position).xy);
+    gl_Position.xyz = DistortShadowClipPos(gl_Position.xyz);
 }
