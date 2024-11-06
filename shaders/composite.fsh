@@ -113,22 +113,23 @@ void main(){
     vec3 Shadow = GetShadow(Depth) * Lightmap.g;
     
     if(Luminance(Shadow) > 0.001) {
-    // Variables needed for reflections
-	bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
-    vec3 NormalModelView = (texture2D(colortex1, TexCoords).rgb * 2.0 - 1.0) * mat3(gbufferModelView);
-    vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.));
-    float Fresnel = clamp(1.0+dot(Normal, normalize(FragmentPosition)),0.0,1.0);
-	vec3 ReflectedProjectedFragmentPosition = reflect(normalize(FragmentPosition), Normal) * mat3(gbufferModelView);
-	float isWet = (rainStrength+wetness)/2.0;
-    
-    if(isWater) {
-    	// Render reflection on water
-    	NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 64.0)*SunColor*(10.0-isWet*5.0);
-		Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 5.0));
-	} else if(NormalModelView.y > 0.75 && wetness > 0.001) {
-		// Render reflection on land when it's wet
-		NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 4.0)*SunColor*2.5*isWet;
-		Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 2.0)*isWet);
+    	// Variables needed for reflections
+		bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
+    	vec3 NormalModelView = (texture2D(colortex1, TexCoords).rgb * 2.0 - 1.0) * mat3(gbufferModelView);
+    	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.));
+    	float Fresnel = clamp(1.0+dot(Normal, normalize(FragmentPosition)),0.0,1.0);
+		vec3 ReflectedProjectedFragmentPosition = reflect(normalize(FragmentPosition), Normal) * mat3(gbufferModelView);
+		float isWet = (rainStrength+wetness)/2.0;
+    	
+    	if(isWater) {
+    		// Render reflection on water
+    		NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 64.0)*SunColor*(10.0-isWet*5.0);
+			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 5.0));
+		} else if(NormalModelView.y > 0.75 && wetness > 0.001) {
+			// Render reflection on land when it's wet
+			NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 4.0)*SunColor*2.5*isWet;
+			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 2.0)*isWet);
+		}
 	}
     
     // Apply shadow
