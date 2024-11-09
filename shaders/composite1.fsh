@@ -73,7 +73,7 @@ vec4 RaymarchClouds(in vec3 RayOrigin, in vec3 RayDirection, float tmax){
 		float RawData, Garbage;
 		float Density = MapClouds(Position, t, RawData);
 		
-		float Dithering = InterleavedGradientNoise(gl_FragCoord.xy*(1.0/VOLUMETRIC_CLOUDS_RESOLUTION))*VOLUMETRIC_CLOUDS_DITHERING_STRENGTH+(1.0-VOLUMETRIC_CLOUDS_DITHERING_STRENGTH);//Hash3(vec3(gl_FragCoord.xy, t)*(1.0/VOLUMETRIC_CLOUDS_RESOLUTION))*VOLUMETRIC_CLOUDS_DITHERING_STRENGTH+(1.0-VOLUMETRIC_CLOUDS_DITHERING_STRENGTH);
+		float Dithering = Hash3(vec3(gl_FragCoord.xy, t)*(1.0/VOLUMETRIC_CLOUDS_RESOLUTION))*VOLUMETRIC_CLOUDS_DITHERING_STRENGTH+(1.0-VOLUMETRIC_CLOUDS_DITHERING_STRENGTH);
 
 		float dt = clamp(Dithering*t, 0.1, 1.0);
 		
@@ -82,7 +82,7 @@ vec4 RaymarchClouds(in vec3 RayOrigin, in vec3 RayDirection, float tmax){
 		vec3 SkyColor = GetSkyColor(RayDirection);
 		
 		vec3 Light = mix(MoonColor, SunColor, SunVisibility2);//(SunColor*SunLight*SunVisibility)+(MoonColor*MoonLight*(1.0-SunVisibility));
-		vec4 Color = vec4(ToLinear(mix(SkyColor, SkyColor+Light*(1.0-rainStrength*0.7), Density)), Density);
+		vec4 Color = vec4(ToLinear(mix(SkyColor, SkyColor+Light*(1.0-rainStrength*0.7)*(Position.y+0.5), Density)), Density);
 		
 		float Fog = exp2(dot(Position, Position)*exp2(-11.0+rainStrength*2.0));
 		Color.a /= Fog;

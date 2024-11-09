@@ -19,7 +19,6 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 * Implement atmospheric scattering based sky function
 * Rewrite volumetric clouds
 * Terrain wind
-* Settings menu
 
 # Known issues
 * none (yet)

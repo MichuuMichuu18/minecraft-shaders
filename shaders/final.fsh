@@ -46,7 +46,7 @@ void main() {
     #endif
 	
 	#ifdef BLOOM
-	Color += pow(tonemap1(texture2D(colortex4, TexCoords/(1.0/BLUR_2NDPASS_RESOLUTION)).rgb), vec3(2.0))*BLOOM_FINAL_BRIGHTNESS;
+	Color += pow(ACES(texture2D(colortex4, TexCoords/(1.0/BLUR_2NDPASS_RESOLUTION)).rgb), vec3(3.0))*BLOOM_FINAL_BRIGHTNESS;
 	#endif
 	
 	#ifdef DESATURATE
@@ -61,8 +61,8 @@ void main() {
 	Color = max(vec3(0.0), Color);
 	
 	#ifdef TONEMAP
-	Color = tonemap1(Color);
+	Color = ACES(Color);
 	#endif
 	
-	gl_FragColor = vec4(Color-InterleavedGradientNoise(gl_FragCoord.xy)*exp2(-8.0), 1.0f);
+	gl_FragColor = vec4(Color+InterleavedGradientNoise(gl_FragCoord.xy)*exp2(-8.0), 1.0f);
 }

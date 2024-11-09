@@ -4,6 +4,7 @@ varying vec4 TexCoords;
 flat varying vec3 GlowColor;
 
 uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;
 uniform sampler2D colortex4;
 uniform sampler2D noisetex;
 uniform vec2 texelSize;

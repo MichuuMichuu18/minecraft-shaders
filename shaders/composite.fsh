@@ -30,16 +30,15 @@ uniform float near;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float wetness;
+uniform float frameTimeCounter;
 
 /*
 const int colortex0Format = RGBA16F;
 const int colortex1Format = RGB16;
 const int colortex2Format = RGB8;
-const int colortex3Format = RGBA16;
+const int colortex3Format = RGB16;
 const int colortex4Format = RGBA16;
 */
-
-#define INFO 0 //[0 1 2 3 4]
 
 const float ambientOcclusionLevel = 0.2;
 const float sunPathRotation = -30.0f;
@@ -51,6 +50,8 @@ const float drynessHalflife = 200.0;
 
 const vec3 Ambient = vec3(0.12, 0.1, 0.14);
 const vec3 TorchColor = vec3(0.7, 0.4, 0.3);
+
+#define SKY_REFLECTIONS
 
 #include "common.glsl"
 #include "sky.glsl"
@@ -73,12 +74,12 @@ vec2 AdjustLightmap(in vec2 Lightmap){
 }
 
 // Input is not adjusted lightmap coordinates
-vec3 GetLightmapColor(in vec2 Lightmap, in vec3 Normal){
+vec3 GetLightmapColor(in vec2 Lightmap){
     // First adjust the lightmap
     Lightmap = AdjustLightmap(Lightmap);
     // Multiply each part of the light map with it's color
     vec3 TorchLighting = Lightmap.x * TorchColor;
-    vec3 Sky = ToLinear(GetSkyColor(vec3(0,0,0)));
+    vec3 Sky = ToLinear(GetSkyColor(vec3(0)));
     vec3 SkyLighting = Lightmap.y * Sky * (eyeBrightnessSmooth.y/255.0);
     // Add the lighting togther to get the total contribution of the lightmap the final color.
     vec3 LightmapLighting = TorchLighting + SkyLighting;
@@ -100,10 +101,11 @@ void main(){
     
     // Get the normal
     vec3 Normal = normalize(texture2D(colortex1, TexCoords).rgb * 2.0 - 1.0);
+    vec3 NormalModelView = (texture2D(colortex1, TexCoords).rgb * 2.0 - 1.0) * mat3(gbufferModelView);
     
     // Get the lightmap
     vec2 Lightmap = texture2D(colortex2, TexCoords).rg;
-    vec3 LightmapColor = GetLightmapColor(Lightmap, Normal);
+    vec3 LightmapColor = GetLightmapColor(Lightmap);
     
     // Do the lighting calculations
     vec3 NdotL = max(dot(Normal, normalize(sunPosition)), 0.0)*SunVisibility*SunColor*2.5;
@@ -112,10 +114,10 @@ void main(){
     
     vec3 Shadow = GetShadow(Depth) * Lightmap.g;
     
-    if(Luminance(Shadow) > 0.001) {
+    #ifdef SKY_REFLECTIONS    
+    if(Luminance(NdotL*Shadow) > 0.001) {
     	// Variables needed for reflections
 		bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
-    	vec3 NormalModelView = (texture2D(colortex1, TexCoords).rgb * 2.0 - 1.0) * mat3(gbufferModelView);
     	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.));
     	float Fresnel = clamp(1.0+dot(Normal, normalize(FragmentPosition)),0.0,1.0);
 		vec3 ReflectedProjectedFragmentPosition = reflect(normalize(FragmentPosition), Normal) * mat3(gbufferModelView);
@@ -125,15 +127,18 @@ void main(){
     		// Render reflection on water
     		NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 64.0)*SunColor*(10.0-isWet*5.0);
 			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 5.0));
-		} else if(NormalModelView.y > 0.75 && wetness > 0.001) {
+		} else if(isWet > 0.001) {
 			// Render reflection on land when it's wet
-			NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 4.0)*SunColor*2.5*isWet;
+			NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 8.0)*SunColor*3.0*isWet;
+			if(NormalModelView.y > 0.75){
 			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 2.0)*isWet);
+			}
 		}
 	}
-    
-    // Apply shadow
-    if(NdotL.x > 0.01) {
+	#endif
+	
+	// Apply shadow
+    if(Luminance(NdotL) > 0.001) {
     	NdotL *= mix(Shadow, 0.1+(LightmapColor/2.0), rainStrength*0.6);
     }
     
