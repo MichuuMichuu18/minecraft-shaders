@@ -15,20 +15,6 @@ uniform ivec2 eyeBrightnessSmooth;
 #define BLOOM
 #define BLOOM_FINAL_BRIGHTNESS 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
-vec3 ACES(vec3 x) {
-  const float a = 2.51;
-  const float b = 0.03;
-  const float c = 2.43;
-  const float d = 0.59;
-  const float e = 0.14;
-  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
-}
-
-vec3 tonemap1(vec3 col){
-	col = col/sqrt(col*col+1.0/2.2);
-	return col;
-}
-
 //#define SHARPENING
 #define SHARPENING_STRENGTH 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
@@ -46,11 +32,11 @@ void main() {
     #endif
 	
 	#ifdef BLOOM
-	Color += pow(ACES(texture2D(colortex4, TexCoords/(1.0/BLUR_2NDPASS_RESOLUTION)).rgb), vec3(3.0))*BLOOM_FINAL_BRIGHTNESS;
+	Color += pow(ACES(texture2D(colortex4, TexCoords/(1.0/BLUR_2NDPASS_RESOLUTION)).rgb), vec3(4.0))*BLOOM_FINAL_BRIGHTNESS;
 	#endif
 	
 	#ifdef DESATURATE
-	Color = mix(vec3(Luminance(Color)), Color, 0.8);
+	Color = mix(vec3(Luminance(Color)), Color, 0.9);
 	#endif
 	
 	#ifdef RETRO_FILTER

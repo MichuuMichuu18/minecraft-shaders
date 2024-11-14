@@ -52,9 +52,11 @@ const vec3 Ambient = vec3(0.12, 0.1, 0.14);
 const vec3 TorchColor = vec3(0.7, 0.4, 0.3);
 
 #define SKY_REFLECTIONS
+#define STARS
 
 #include "common.glsl"
 #include "sky.glsl"
+#include "stars.glsl"
 
 float AdjustLightmapTorch(in float torch) {
     const float K = 2.0;
@@ -79,7 +81,7 @@ vec3 GetLightmapColor(in vec2 Lightmap){
     Lightmap = AdjustLightmap(Lightmap);
     // Multiply each part of the light map with it's color
     vec3 TorchLighting = Lightmap.x * TorchColor;
-    vec3 Sky = ToLinear(GetSkyColor(vec3(0)));
+    vec3 Sky = GetSkyColor(vec3(0, 0, 0), false);
     vec3 SkyLighting = Lightmap.y * Sky * (eyeBrightnessSmooth.y/255.0);
     // Add the lighting togther to get the total contribution of the lightmap the final color.
     vec3 LightmapLighting = TorchLighting + SkyLighting;
@@ -112,26 +114,34 @@ void main(){
     NdotL += max(dot(Normal, normalize(-sunPosition)), 0.0)*MoonVisibility*MoonColor;
     NdotL *= 1.0-rainStrength*0.5;
     
+    // Calculate shadow
     vec3 Shadow = GetShadow(Depth) * Lightmap.g;
     
-    #ifdef SKY_REFLECTIONS    
-    if(Luminance(NdotL*Shadow) > 0.001) {
+    #ifdef SKY_REFLECTIONS
+    bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
+    
+    if(Luminance(NdotL)*Lightmap.g > 0.001 || isWater) {
     	// Variables needed for reflections
-		bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
-    	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.));
+    	vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.));    	
     	float Fresnel = clamp(1.0+dot(Normal, normalize(FragmentPosition)),0.0,1.0);
 		vec3 ReflectedProjectedFragmentPosition = reflect(normalize(FragmentPosition), Normal) * mat3(gbufferModelView);
 		float isWet = (rainStrength+wetness)/2.0;
+		
+		float Stars = 0.0;
+		#ifdef STARS
+		vec2 StarsCoordinates = ReflectedProjectedFragmentPosition.xz/(1.0+clamp(ReflectedProjectedFragmentPosition.y, 0.0, 1.0));
+		Stars = StableStarField(StarsCoordinates*500.0, 0.999)*6.0*(1.0-rainStrength)*MoonVisibility2*(ReflectedProjectedFragmentPosition.y+0.3);
+		#endif
     	
     	if(isWater) {
     		// Render reflection on water
-    		NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 64.0)*SunColor*(10.0-isWet*5.0);
-			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 5.0));
+    		NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 128.0)*SunColor*(10.0-isWet*5.0)*Shadow;
+			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition, false)+Stars), pow(Fresnel, 6.0));
 		} else if(isWet > 0.001) {
 			// Render reflection on land when it's wet
-			NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 8.0)*SunColor*3.0*isWet;
+			NdotL += pow(max(dot(FragmentPosition, reflect(normalize(sunPosition), Normal)), 0.0), 8.0)*SunColor*3.0*isWet*Shadow;
 			if(NormalModelView.y > 0.75){
-			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition)), pow(Fresnel, 2.0)*isWet);
+			Albedo = mix(Albedo, ToLinear(GetSkyColor(ReflectedProjectedFragmentPosition, false)+Stars), pow(Fresnel, 4.0)*isWet);
 			}
 		}
 	}

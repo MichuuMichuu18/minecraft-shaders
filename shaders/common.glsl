@@ -6,6 +6,20 @@ vec3 ToLinear(vec3 col){
 	return mix(col / 12.92, pow((col+0.055)/1.055,vec3(2.4)), step(0.04045, col));
 }
 
+vec3 ACES(vec3 x) {
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+vec3 tonemap1(vec3 col){
+	col = col/sqrt(col*col+1.0/2.2);
+	return col;
+}
+
 uniform mat4 gbufferProjectionInverse;
 vec3 ToScreenSpace(vec3 p) {
     vec3 p3 = p * 2. - 1.;

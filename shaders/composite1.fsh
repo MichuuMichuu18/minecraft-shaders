@@ -79,10 +79,10 @@ vec4 RaymarchClouds(in vec3 RayOrigin, in vec3 RayDirection, float tmax){
 		
 		//vec4 SunPosition = vec4(sunPosition, 1.0) * gbufferModelView;
 		//float SunLight = clamp((Density-MapClouds(Position+0.3*normalize(mix(-SunPosition.xyz, SunPosition.xyz, SunVisibility2)), t, Garbage))/(0.05+rainStrength*0.2), 0.0, 1.0);
-		vec3 SkyColor = GetSkyColor(RayDirection);
+		vec3 SkyColor = ToLinear(GetSkyColor(RayDirection, false));
 		
 		vec3 Light = mix(MoonColor, SunColor, SunVisibility2);//(SunColor*SunLight*SunVisibility)+(MoonColor*MoonLight*(1.0-SunVisibility));
-		vec4 Color = vec4(ToLinear(mix(SkyColor, SkyColor+Light*(1.0-rainStrength*0.7)*(Position.y+0.5), Density)), Density);
+		vec4 Color = vec4(mix(SkyColor, SkyColor+Light*(1.0-rainStrength*0.7)*clamp(Position.y+0.7, -0.2, 1.0), Density), Density);
 		
 		float Fog = exp2(dot(Position, Position)*exp2(-11.0+rainStrength*2.0));
 		Color.a /= Fog;

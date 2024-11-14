@@ -2,13 +2,6 @@ uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 uniform sampler2D shadowcolor0;
 
-const bool 		shadowtex1Mipmap = true;
-const bool 		shadowtex1Nearest = false;
-const bool 		shadowcolor0Mipmap = true;
-const bool 		shadowcolor0Nearest = false;
-const bool 		shadowcolor1Mipmap = true;
-const bool 		shadowcolor1Nearest = false;
-
 const float ShadowBias = 0.001;
 
 #define COLORED_SHADOWS
@@ -24,7 +17,6 @@ vec3 TransparentShadow(in vec3 SampleCoords){
     
     #ifdef COLORED_SHADOWS
     vec4 ShadowColor0 = texture2D(shadowcolor0, SampleCoords.xy);
-    ShadowColor0.rgb = mix(vec3(Luminance(ShadowColor0.rgb)), ShadowColor0.rgb, 2.0);
     vec3 TransmittedColor = ShadowColor0.rgb * (1.0f - ShadowColor0.a); // Perform a blend operation with the sun color
     return mix(TransmittedColor * ShadowVisibility1, vec3(1.0f), ShadowVisibility0);
     #else

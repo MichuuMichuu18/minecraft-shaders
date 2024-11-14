@@ -30,7 +30,7 @@ uniform ivec2 eyeBrightnessSmooth;
 #define VOLUMETRIC_CLOUDS_RESOLUTION 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define FOG
-#define FOG_DENSITY 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define FOG_DENSITY 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
 #define FOG_PLAYER_EFFECTS 
 
 void main(){
@@ -60,10 +60,10 @@ void main(){
     vec3 FragmentPosition = ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.)) * mat3(gbufferModelView);
     vec3 FogInCave = vec3(0.402, 0.41, 0.405);
     if(isEyeInWater == 1) FogInCave.rgb = FogInCave.brg;
-    vec4 FogColor = vec4(ToLinear(mix(GetSkyColor(FragmentPosition), FogInCave, CaveFactor)), mix(FOG_DENSITY/1000.0, FOG_DENSITY/25.0, rainStrength*(1.0-CaveFactor))+CaveFactor*0.02+MoonVisibility2*0.01);
+    vec4 FogColor = vec4(ToLinear(mix(GetSkyColor(FragmentPosition, false), FogInCave, CaveFactor)), mix(FOG_DENSITY/1000.0, FOG_DENSITY/25.0, rainStrength*(1.0-CaveFactor))+CaveFactor*0.02);
     vec2 Position = gbufferProjectionInverse[2].zw * Depth + gbufferProjectionInverse[3].zw;
 	float WorldDistance = (Position.x/Position.y);
-	//if(isEyeInWater == 1) { FogColor.rgb *= fogColor; FogColor.a = 0.005; Albedo *= vec3(0.9, 1.1, 1.3); }
+	if(isEyeInWater == 1) { FogColor.a *= 10.0; Albedo *= vec3(0.9, 1.1, 1.3); }
 	
 	FogColor.a *= 1.0-clamp(fogcloudidk, 0.0, 1.0);
 	
