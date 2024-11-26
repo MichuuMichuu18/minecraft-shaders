@@ -12,8 +12,6 @@ void main(){
     // Sample from texture atlas and account for biome color + ambient occlusion
     vec4 Albedo = texture2D(texture, TexCoords) * Color;
     
-    Albedo.rgb *= 0.8;
-    
     /* DRAWBUFFERS:012 */
     // Write the values to the color textures
     gl_FragData[0] = Albedo;

@@ -14,6 +14,8 @@ uniform mat4 shadowModelView;
 uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 
+uniform float rainStrength;
+
 in vec2 mc_Entity;
 
 #include "common.glsl"
@@ -31,5 +33,18 @@ void main(){
     gl_Position = ftransform();
     TexCoords = gl_MultiTexCoord0.st;
     Color = gl_Color;
+    
+    if(mc_Entity.x == 4) {
+    	vec3 vPosView = (gl_ModelViewMatrix * gl_Vertex).xyz;
+    	vec3 vPosPlayer = mat3(shadowModelViewInverse) * vPosView;
+		vec3 worldPos = vPosPlayer + cameraPosition;
+		
+		worldPos += (Noise3(worldPos+frameTimeCounter*0.3)-0.05)*(0.1-0.05*rainStrength);
+	
+		vPosPlayer = worldPos - cameraPosition;
+		vPosView = mat3(shadowModelView) * vPosPlayer;
+		gl_Position = gl_ProjectionMatrix * vec4(vPosView, 1.0);
+	}
+    
     gl_Position.xyz = DistortShadowClipPos(gl_Position.xyz);
 }

@@ -46,7 +46,7 @@ void main() {
 	TexCoords = vec4(gl_MultiTexCoord0.st, SunMeanCenter);
     
     float Daytime = 2.0-(sign(sunPosition.z)+1.0);
-    GlowColor = SunColor*SunVisibilitySum*(SunVisibility+0.1)*Daytime;
+    GlowColor = SunColor*SunVisibilitySum*(SunVisibility*SunVisibility+0.1)*Daytime;
     #else
     TexCoords = vec4(gl_MultiTexCoord0.st, 0.0, 0.0);
     #endif

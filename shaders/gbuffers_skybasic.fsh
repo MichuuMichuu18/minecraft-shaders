@@ -33,7 +33,7 @@ void main(){
     if(FragmentPosition.y > 0.0){
     	#ifdef STARS
 		vec2 StarsCoordinates = FragmentPosition.xz/(1.0+clamp(FragmentPosition.y, 0.0, 1.0));
-		Albedo.rgb += StableStarField(StarsCoordinates*500.0, 0.999)*3.0*(1.0-rainStrength)*MoonVisibility2*(FragmentPosition.y+0.3);
+		Albedo.rgb += StableStarField(StarsCoordinates*500.0, 0.997)*1.0*(1.0-rainStrength)*MoonVisibility2*(FragmentPosition.y+0.3);
 		#endif
 	}
     

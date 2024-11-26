@@ -30,7 +30,7 @@ uniform ivec2 eyeBrightnessSmooth;
 #define VOLUMETRIC_CLOUDS_RESOLUTION 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define FOG
-#define FOG_DENSITY 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
+#define FOG_DENSITY 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
 #define FOG_PLAYER_EFFECTS 
 
 void main(){

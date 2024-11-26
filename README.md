@@ -18,7 +18,6 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 # TODO
 * Screen-space reflections
 * Rewrite volumetric clouds (they are kinda sloow)
-* Terrain wind
 
 # Known issues
 * none (yet)

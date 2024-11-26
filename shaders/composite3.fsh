@@ -39,7 +39,7 @@ void main(){
 	dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
 
 	float lumaSum   = lumaNW + lumaNE + lumaSW + lumaSE;
-	float dirReduce = max(lumaSum * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+	float dirReduce = max(lumaSum * (0.5 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
 	float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
 
 	dir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), dir * rcpDirMin)) / vec2(viewWidth, viewHeight);
