@@ -44,13 +44,14 @@ float InterleavedGradientNoise(vec2 p){
 
 float Get3DNoise(vec3 pos){
     float p = floor(pos.z);
-    float f = pos.z - p;
+    float f = fract(pos.z);//pos.z - p
+    f = (f*f) * (3.0-2.0*f);
     
     const float invNoiseRes = 1.0 / 64.0;
     
     float zStretch = 17.0 * invNoiseRes;
     
-    vec2 coord = pos.xy * invNoiseRes + (p * zStretch);
+    vec2 coord = pos.xz * invNoiseRes + (p * zStretch);
     
     vec2 noise = vec2(texture(noisetex, coord).x,
 					  texture(noisetex, coord + zStretch).y);
@@ -67,16 +68,16 @@ float Hash3(in vec3 x){
 float Noise3(in vec3 x){
 	vec3 i = floor(x);
 	vec3 f = fract(x);
-	f = smoothstep(0.0, 1.0, f);
+	f = (f*f) * (3.0-2.0*f);
 
 	return mix(mix(mix(Hash3(i+vec3(0,0,0)),
-										Hash3(i+vec3(1,0,0)),f.x),
-								mix(Hash3(i+vec3(0,1,0)),
-										Hash3(i+vec3(1,1,0)),f.x),f.y),
-						mix(mix(Hash3(i+vec3(0,0,1)),
-										Hash3(i+vec3(1,0,1)),f.x),
-								mix(Hash3(i+vec3(0,1,1)),
-										Hash3(i+vec3(1,1,1)),f.x),f.y),f.z);
+	                   Hash3(i+vec3(1,0,0)),f.x),
+	               mix(Hash3(i+vec3(0,1,0)),
+	                   Hash3(i+vec3(1,1,0)),f.x),f.y),
+               mix(mix(Hash3(i+vec3(0,0,1)),
+	                   Hash3(i+vec3(1,0,1)),f.x),
+	               mix(Hash3(i+vec3(0,1,1)),
+	                   Hash3(i+vec3(1,1,1)),f.x),f.y),f.z);
 }
 
 vec3 Hash33(in vec3 x){
@@ -112,6 +113,12 @@ vec2 Vogel(int sampleIndex, int samplesCount, float Offset){
 
 vec4 GetNoise(vec2 coord){
   ivec2 screenCoord = ivec2(coord * vec2(viewWidth, viewHeight)); // exact pixel coordinate onscreen
+  ivec2 noiseCoord = screenCoord % 64; // wrap to range of noiseTextureResolution
+  return texelFetch(noisetex, noiseCoord, 0);
+}
+
+vec4 GetNoise2(vec2 coord, vec2 resolution){
+  ivec2 screenCoord = ivec2(coord * resolution); // exact pixel coordinate onscreen
   ivec2 noiseCoord = screenCoord % 64; // wrap to range of noiseTextureResolution
   return texelFetch(noisetex, noiseCoord, 0);
 }

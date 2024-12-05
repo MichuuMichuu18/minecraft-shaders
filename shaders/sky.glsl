@@ -10,7 +10,7 @@ float MoonVisibility2 = 1.0-SunVisibility2;
 #define DRAW_SUN
 //#define DRAW_MOON
 
-#define PI 3.14159265359
+#define PI 3.14159265
 
 #define RayleighCoefficient vec3(0.25,0.55,0.95)
 #define MieCoefficient mix(0.2, 1.0, rainStrength)
@@ -116,7 +116,7 @@ vec3 GetSkyColor(vec3 p, bool drawCircles){
 	}
 	
 	vec3 Sky = mix(NightSky, DaySky, SunVisibility2);
-	Sky = Sky/(1.0+Sky); // Additional tonemapping needed
+	Sky = Sky/(1.0+Sky); // Additional tonemapping
 	
-	return clamp(Sky, 0.0, 1.0);
+	return clamp(Sky, 0.0, 1.0); // Clamping to avoid dark spots on the screen with bloom and sharpening
 }

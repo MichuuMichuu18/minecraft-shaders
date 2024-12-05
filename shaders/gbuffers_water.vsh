@@ -2,8 +2,10 @@
 
 varying vec2 TexCoords;
 varying vec2 LightmapCoords;
-varying vec3 Normal;
+varying vec4 Normal;
 varying vec4 Color;
+
+in vec2 mc_Entity;
 
 void main() {
     // Transform the vertex
@@ -14,6 +16,8 @@ void main() {
     LightmapCoords = mat2(gl_TextureMatrix[1]) * gl_MultiTexCoord1.st;
     // Transform them into the [0, 1] range
     LightmapCoords = (LightmapCoords * 33.05f / 32.0f) - (1.05f / 32.0f);
-    Normal = gl_NormalMatrix * gl_Normal;
+    Normal = vec4(gl_NormalMatrix * gl_Normal, 0.0);
     Color = gl_Color;
+    
+    if(mc_Entity.x == 1) Normal.a = 1.0;
 }

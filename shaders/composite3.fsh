@@ -17,8 +17,10 @@ void main(){
     vec3 Albedo = texture2D(colortex0, TexCoords).rgb;
     
     #ifdef FXAA
+    vec2 resolution = vec2(viewWidth, viewHeight);
+    
     float FXAA_SPAN_MAX   = 8.0;
-	float FXAA_REDUCE_MUL = 1.0 / FXAA_SPAN_MAX;
+	float FXAA_REDUCE_MUL = 1.0 / 8.0;
 	float FXAA_REDUCE_MIN = 1.0 / 128.0;
 
 	// 1st stage - Find edge
@@ -39,17 +41,18 @@ void main(){
 	dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
 
 	float lumaSum   = lumaNW + lumaNE + lumaSW + lumaSE;
-	float dirReduce = max(lumaSum * (0.5 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+	float dirReduce = max(lumaSum * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
 	float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
 
-	dir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), dir * rcpDirMin)) / vec2(viewWidth, viewHeight);
+	dir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), dir * rcpDirMin)) / resolution*0.5;
 
 	// 2nd stage - Blur
-	vec3 rgbA = 0.5 * (texture2D(colortex0, TexCoords + dir * (1.0/3.0 - 0.5)).rgb +
-										texture2D(colortex0, TexCoords + dir * (2.0/3.0 - 0.5)).rgb);
+	vec3 rgbA = 0.5 * (
+		texture2D(colortex0, TexCoords + dir * (1.0/3.0 - 0.5)).rgb +
+		texture2D(colortex0, TexCoords + dir * (2.0/3.0 - 0.5)).rgb);
 	vec3 rgbB = rgbA * 0.5 + 0.25 * (
-										texture2D(colortex0, TexCoords + dir * (0.0/3.0 - 0.5)).rgb +
-										texture2D(colortex0, TexCoords + dir * (3.0/3.0 - 0.5)).rgb);
+		texture2D(colortex0, TexCoords + dir * -0.5).rgb +
+		texture2D(colortex0, TexCoords + dir * 0.5).rgb);
 
 	float lumaB = Luminance(rgbB);
 
