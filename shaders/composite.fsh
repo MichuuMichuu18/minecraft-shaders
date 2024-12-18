@@ -50,9 +50,11 @@ const float drynessHalflife = 300.0;
 
 //const vec3 Ambient = vec3(0.145, 0.155, 0.15); // gray ambient
 //const vec3 Ambient = vec3(0.13, 0.17, 0.16); // greenish blue ambient
-const vec3 Ambient = vec3(0.12, 0.1, 0.14);  // purple ambient
+//const vec3 Ambient = vec3(0.12, 0.1, 0.14);  // purple ambient
+const vec3 Ambient = vec3(0.13, 0.11, 0.14);  // grayish purple ambient
 const vec3 TorchColor = vec3(0.8, 0.35, 0.2);
 
+#define SKY_AMBIENT_LIGHT_SAMPLING
 #define SKY_REFLECTIONS
 #define STARS
 
@@ -61,7 +63,7 @@ const vec3 TorchColor = vec3(0.8, 0.35, 0.2);
 #include "stars.glsl"
 
 float AdjustLightmapTorch(in float torch) {
-    return 2.0 * pow(torch, 2.0);
+    return 3.0 * pow(torch, 2.0);
 }
 
 float AdjustLightmapSky(in float sky){
@@ -76,13 +78,32 @@ vec2 AdjustLightmap(in vec2 Lightmap){
 }
 
 // Input is not adjusted lightmap coordinates
-vec3 GetLightmapColor(in vec2 Lightmap){
+vec3 GetLightmapColor(in vec2 Lightmap, in vec3 Normal){
     // First adjust the lightmap
     Lightmap = AdjustLightmap(Lightmap);
     // Multiply each part of the light map with it's color
     vec3 TorchLighting = Lightmap.x * TorchColor;
+    
+    float SkyCameraBrightness = (eyeBrightnessSmooth.y/255.0);
+    #ifdef SKY_AMBIENT_LIGHT_SAMPLING    
+    vec3 SkyAccum = vec3(0.0f);
+    if(SkyCameraBrightness > 0.001){
+    	float BlurSum = 0.0;
+    	int Samples = 7;
+    	for(int i = 0; i < Samples; ++i) {
+     	    vec3 SampleCoords = VogelHemisphere(i, Samples, 0.0);
+        	SkyAccum += ToLinear(GetSkyColor(SampleCoords, false));
+        	BlurSum++;
+    	}
+    	SkyAccum /= BlurSum;
+    }
+    
+    vec3 SkyLighting = Lightmap.y * SkyAccum * SkyCameraBrightness;
+    #else
     vec3 Sky = ToLinear(GetSkyColor(vec3(0, 0, 0), false));
-    vec3 SkyLighting = Lightmap.y * Sky * (eyeBrightnessSmooth.y/255.0);
+    vec3 SkyLighting = Lightmap.y * Sky * SkyCameraBrightness;
+    #endif
+    
     // Add the lighting togther to get the total contribution of the lightmap the final color.
     vec3 LightmapLighting = TorchLighting + SkyLighting;
     // Return the value
@@ -107,7 +128,7 @@ void main(){
     
     // Get the lightmap
     vec2 Lightmap = texture2D(colortex2, TexCoords).rg;
-    vec3 LightmapColor = GetLightmapColor(Lightmap);
+    vec3 LightmapColor = GetLightmapColor(Lightmap, NormalModelView);
     
     // Do the lighting calculations
     vec3 NdotL = max(dot(Normal, normalize(sunPosition)), 0.0)*SunVisibility*SunColor*3.0;
@@ -126,7 +147,7 @@ void main(){
     
     #ifdef SKY_REFLECTIONS
     bool isWater = Depth < texture2D(depthtex1, TexCoords).r;
-    if(Luminance(NdotL)*Lightmap.g > 0.001 || isWater) {
+    if(Lightmap.g > 0.001 || isWater) {
     	// Variables needed for reflections
     	vec3 FragmentPosition = normalize(ToScreenSpaceVector(vec3(gl_FragCoord.xy*texelSize,1.)));    
     	vec3 ReflectedProjectedFragmentPosition = normalize(reflect(FragmentPosition, Normal) * mat3(gbufferModelView));
@@ -158,12 +179,12 @@ void main(){
 
 			// Scale by sunlight color and adjust for nighttime
 			float NightFactor = (1.0 - MoonVisibility2 * 0.5);
-			ReflectionColor += SpecularHighlight * SunColor * 10.0 * NightFactor;
+			ReflectionColor += SpecularHighlight * SunColor * 10.0 * NightFactor * Shadow; // temporary fix - multiplying by shadow, remove that after implementing SSR.
     		
     		if(isWater) {
-    			Diffuse = mix(Diffuse, ReflectionColor, Fresnel);
+    			Diffuse = mix(Diffuse, ReflectionColor, Fresnel*Lightmap.g);
     		} else if(isWet > 0.001) {
-    			Diffuse = mix(Diffuse, ReflectionColor, pow(Fresnel, 8.0)*wetness);
+    			Diffuse = mix(Diffuse, ReflectionColor, pow(Fresnel, 8.0)*wetness*Lightmap.g);
     		}
 		}
 	}

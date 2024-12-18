@@ -1,4 +1,4 @@
-const vec3 SunColor = vec3(1.0, 0.75, 0.4);
+const vec3 SunColor = vec3(1.0, 0.8, 0.65);
 const vec3 MoonColor = vec3(0.13, 0.16, 0.21);
 
 vec3 SunDirection = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);

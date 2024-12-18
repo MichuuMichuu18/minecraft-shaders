@@ -103,13 +103,28 @@ vec3 Noise33(in vec3 x){
 }
 
 const float PI = 3.14159265;
-const float GoldenAngle = PI * (3.0 - sqrt(5.0));
+const float GoldenAngle = 2.39996322;
 
 vec2 Vogel(int sampleIndex, int samplesCount, float Offset){
   float r = sqrt(float(sampleIndex) + 0.5f) / sqrt(float(samplesCount));
   float theta = float(sampleIndex) * GoldenAngle + Offset;
   return r * vec2(cos(theta), sin(theta));
 }
+
+vec3 VogelHemisphere(int sampleIndex, int samplesCount, float Offset) {
+    float r = sqrt(float(sampleIndex) + 0.5f) / sqrt(float(samplesCount));
+    float theta = float(sampleIndex) * GoldenAngle + Offset;
+
+    // x and y coordinates (Vogel Disk)
+    float x = r * cos(theta);
+    float y = r * sin(theta);
+
+    // z-coordinate (Hemisphere)
+    float z = sqrt(1.0 - r * r);
+
+    return vec3(x, y, z);
+}
+
 
 vec4 GetNoise(vec2 coord){
   ivec2 screenCoord = ivec2(coord * vec2(viewWidth, viewHeight)); // exact pixel coordinate onscreen
