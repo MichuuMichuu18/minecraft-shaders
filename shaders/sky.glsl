@@ -1,5 +1,5 @@
-const vec3 SunColor = vec3(1.0, 0.8, 0.65);
-const vec3 MoonColor = vec3(0.13, 0.16, 0.21);
+const vec3 SunColor = vec3(1.0, 0.85, 0.75);
+const vec3 MoonColor = vec3(0.12, 0.16, 0.21);
 
 vec3 SunDirection = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
 float SunVisibility = clamp((dot(normalize(sunPosition), upPosition) + 0.5) * 0.025, 0.0, 1.0);
@@ -12,11 +12,11 @@ float MoonVisibility2 = 1.0-SunVisibility2;
 
 #define PI 3.14159265
 
-#define RayleighCoefficient vec3(0.25,0.55,0.95)
-#define MieCoefficient mix(0.2, 1.0, rainStrength)
+#define RayleighCoefficient vec3(0.3,0.5,0.8)
+#define MieCoefficient mix(0.3, 1.0, rainStrength)
 #define MieMultiscatterRadius mix(0.05, 1.0, rainStrength)
-#define EarthRadius 120.0
-#define AtmosphereRadius 0.5
+#define EarthRadius 240.0
+#define AtmosphereRadius 1.0
 
 #define r(x,x2,y)(x*y+x2*y)					// Reflects incoming light
 #define a(x,x2,y)exp2(-r(x,x2,y))			// Absorbs incoming light
@@ -53,6 +53,7 @@ float CalculateSunSpot(float x, float sunSize){
 	return smoothstep(sunSize, sunSize+(1.0-sunSize), x);
 }
 
+// TODO: find a way to not render sunlight in reflections
 vec3 CalculateAtmosphericScattering(vec3 p, vec3 lp, float intensity, bool renderSunSpot, float SunSize){
 	float lDotV = 1.0-distance(p, lp); // float lDotV = dot(l, v);
 
@@ -85,7 +86,7 @@ vec3 GetSkyColor(vec3 p, bool drawCircles){
 	//Sky *= 1.0-rainStrength*0.35;
 	//Sky = mix(Sky, vec3(Luminance(Sky)), rainStrength*0.8);
 	
-	float dayIntensity = 1.0;
+	float dayIntensity = 0.8;
 	float nightIntensity = 0.08;
 	
 	float sunSize = 0.98;
@@ -116,7 +117,7 @@ vec3 GetSkyColor(vec3 p, bool drawCircles){
 	}
 	
 	vec3 Sky = mix(NightSky, DaySky, SunVisibility2);
-	Sky = Sky/(1.0+Sky); // Additional tonemapping
+	Sky = Sky/(0.8+Sky); // Additional tonemapping
 	
 	return clamp(Sky, 0.0, 1.0); // Clamping to avoid dark spots on the screen with bloom and sharpening
 }
