@@ -18,6 +18,7 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 
 # TODO
 * Screen-space reflections
+* Just rewrite it at this point, its quite messy, colors aren't right and it's all unoptimized
 
 # Known issues
 * Shadow filtering darkens sun/moon light
