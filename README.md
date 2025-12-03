@@ -1,6 +1,8 @@
 # Minecraft Shaders
 My shaderpack for Minecraft, written for use with Iris Shaders, compatibility with Optifine is not guaranteed.
 
+I'm not going to continue developing this shaderpack. It has a huge legacy of messy code, is far too unoptimized to run even on the lowest settings, and contains many quirks and quick fixes.
+
 # Features
 * Multiple profiles suited for wide range of hardware (Lite, Low, Medium, High, Ultra) - removed as shaderpack is still wip, settings menu is done
 * Shadow filtering (soft shadows)
@@ -18,7 +20,6 @@ My shaderpack for Minecraft, written for use with Iris Shaders, compatibility wi
 
 # TODO
 * Screen-space reflections
-* Just rewrite it at this point, its quite messy, colors aren't right and it's all unoptimized
 
 # Known issues
 * Shadow filtering darkens sun/moon light
